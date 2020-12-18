@@ -1,13 +1,13 @@
 ---
 - name: Check if javac command exists
-  stat: 
+  stat:
     path: /usr/bin/javac
   register: JAVAC_EXISTS
 - name: Install {{SOLR_NAME}} dependencies. 
   package:
     name: [git,java-latest-openjdk-devel,java-latest-openjdk]
   become: yes
-  when: JAVAC_EXISTS.stat.exists == false
+  when: not JAVAC_EXISTS.stat.exists
 - name: Create the {{SOLR_NAME}} source directory {{SOLR_SRC}}. 
   file:
     name: "{{SOLR_SRC}}"
@@ -16,15 +16,15 @@
     group: "{{USER_NAME}}"
   become: yes
 - name: Check for the solr build.xml
-  stat: 
+  stat:
     path: "{{SOLR_SRC}}/build.xml"
   register: solr_build
 - name: Download the Solr binary
-  get_url: 
+  get_url:
     url: "{{ SOLR_DOWNLOAD_URL }}"
     dest: "{{ SOLR_DOWNLOAD_DEST }}"
     checksum: "sha512:{{ SOLR_DOWNLOAD_SHA512 }}"
-  when: solr_build.stat.exists == False
+  when: not solr_build.stat.exists
 - name: Create the computate source directory {{COMPUTATE_SRC}}
   file:
     name: "{{COMPUTATE_SRC}}"
@@ -33,14 +33,14 @@
     group: "{{USER_NAME}}"
   become: yes
 - name: Check for the computate pom.xml
-  stat: 
+  stat:
     path: "{{COMPUTATE_SRC}}/pom.xml"
   register: computate_pom
 - name: Clone the computate source code
   git:
     repo: "{{COMPUTATE_REPO}}"
     dest: "{{COMPUTATE_SRC}}"
-  when: computate_pom.stat.exists == False
+  when: not computate_pom.stat.exists
 - name: Create the {{SOLR_NAME}} install directory {{SOLR_OPT}}. 
   file:
     name: "{{SOLR_OPT}}"
@@ -49,7 +49,7 @@
     group: "{{USER_NAME}}"
   become: yes
 - name: Install {{SOLR_NAME}} into the {{SOLR_OPT}} install directory. 
-  unarchive: 
+  unarchive:
     src: "{{ SOLR_DOWNLOAD_DEST }}"
     dest: "{{ SOLR_OPT }}"
     remote_src: yes
