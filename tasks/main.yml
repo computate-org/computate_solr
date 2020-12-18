@@ -1,5 +1,5 @@
 ---
-- name: Check if javac command exists: 
+- name: Check if javac command exists
   stat: 
     path: /usr/bin/javac
   register: JAVAC_EXISTS
