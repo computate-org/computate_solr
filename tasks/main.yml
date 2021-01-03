@@ -3,21 +3,21 @@
   stat:
     path: /usr/bin/javac
   register: JAVAC_EXISTS
-- name: Install {{SOLR_NAME}} dependencies. 
+- name: Install {{ SOLR_NAME }} dependencies. 
   package:
     name: [git,java-latest-openjdk-devel,java-latest-openjdk]
   become: yes
   when: not JAVAC_EXISTS.stat.exists
-- name: Create the {{SOLR_NAME}} source directory {{SOLR_SRC}}. 
+- name: Create the {{ SOLR_NAME }} source directory {{ SOLR_SRC }}. 
   file:
-    name: "{{SOLR_SRC}}"
+    name: "{{ SOLR_SRC }}"
     state: directory
-    owner: "{{USER_NAME}}"
-    group: "{{USER_NAME}}"
+    owner: "{{ USER_NAME }}"
+    group: "{{ USER_NAME }}"
   become: yes
 - name: Check for the solr build.xml
   stat:
-    path: "{{SOLR_SRC}}/build.xml"
+    path: "{{ SOLR_SRC }}/build.xml"
   register: solr_build
 - name: Download the Solr binary
   get_url:
@@ -25,70 +25,70 @@
     dest: "{{ SOLR_DOWNLOAD_DEST }}"
     checksum: "sha512:{{ SOLR_DOWNLOAD_SHA512 }}"
   when: not solr_build.stat.exists
-- name: Create the computate source directory {{COMPUTATE_SRC}}
+- name: Create the computate source directory {{ COMPUTATE_SRC }}
   file:
-    name: "{{COMPUTATE_SRC}}"
+    name: "{{ COMPUTATE_SRC }}"
     state: directory
-    owner: "{{USER_NAME}}"
-    group: "{{USER_NAME}}"
+    owner: "{{ USER_NAME }}"
+    group: "{{ USER_NAME }}"
   become: yes
 - name: Check for the computate pom.xml
   stat:
-    path: "{{COMPUTATE_SRC}}/pom.xml"
+    path: "{{ COMPUTATE_SRC }}/pom.xml"
   register: computate_pom
 - name: Clone the computate source code
   git:
-    repo: "{{COMPUTATE_REPO}}"
-    dest: "{{COMPUTATE_SRC}}"
+    repo: "{{ COMPUTATE_REPO }}"
+    dest: "{{ COMPUTATE_SRC }}"
   when: not computate_pom.stat.exists
-- name: Create the {{SOLR_NAME}} install directory {{SOLR_OPT}}. 
+- name: Create the {{ SOLR_NAME }} install directory {{ SOLR_OPT }}. 
   file:
-    name: "{{SOLR_OPT}}"
+    name: "{{ SOLR_OPT }}"
     state: directory
-    owner: "{{USER_NAME}}"
-    group: "{{USER_NAME}}"
+    owner: "{{ USER_NAME }}"
+    group: "{{ USER_NAME }}"
   become: yes
-- name: Install {{SOLR_NAME}} into the {{SOLR_OPT}} install directory. 
+- name: Install {{ SOLR_NAME }} into the {{ SOLR_OPT }} install directory. 
   unarchive:
     src: "{{ SOLR_DOWNLOAD_DEST }}"
     dest: "{{ SOLR_OPT }}"
     remote_src: yes
     extra_opts: [--strip-components=1]
-- name: Create the {{SOLR_NAME}} data directory {{SOLR_DATA}}. 
+- name: Create the {{ SOLR_NAME }} data directory {{ SOLR_DATA }}. 
   file:
-    name: "{{SOLR_DATA}}"
+    name: "{{ SOLR_DATA }}"
     state: directory
-- name: Copy the solr.xml to the {{SOLR_NAME}} directory {{SOLR_DATA}}. 
+- name: Copy the solr.xml to the {{ SOLR_NAME }} directory {{ SOLR_DATA }}. 
   copy:
-    src: "{{SOLR_OPT}}/server/solr/solr.xml"
-    dest: "{{SOLR_OPT}}/solr.xml"
+    src: "{{ SOLR_OPT }}/server/solr/solr.xml"
+    dest: "{{ SOLR_OPT }}/solr.xml"
     remote_src: yes
-- name: Delete the example directory {{SOLR_OPT}}/example. 
+- name: Delete the example directory {{ SOLR_OPT }}/example. 
   file:
-    name: "{{SOLR_OPT}}/example"
+    name: "{{ SOLR_OPT }}/example"
     state: absent
-- name: Link the computate configset into {{SOLR_NAME}}. 
+- name: Link the computate configset into {{ SOLR_NAME }}. 
   file:
-    src: "{{COMPUTATE_SRC}}/config/solr/server/solr/configsets/computate"
-    dest: "{{SOLR_OPT}}/server/solr/configsets/computate"
+    src: "{{ COMPUTATE_SRC }}/config/solr/server/solr/configsets/computate"
+    dest: "{{ SOLR_OPT }}/server/solr/configsets/computate"
     state: link
-- name: Find the {{SOLR_NAME}} binaries in {{SOLR_OPT}}/bin. 
+- name: Find the {{ SOLR_NAME }} binaries in {{ SOLR_OPT }}/bin. 
   find:
-    paths: "{{SOLR_OPT}}/bin"
+    paths: "{{ SOLR_OPT }}/bin"
     recurse: no
   register: BIN_FILES
-- name: Make the {{SOLR_NAME}} binaries executable in {{SOLR_OPT}}/bin. 
+- name: Make the {{ SOLR_NAME }} binaries executable in {{ SOLR_OPT }}/bin. 
   file:
     dest: "{{item.path}}"
     mode: a+x
   with_items:
     - "{{BIN_FILES.files}}"
-- name: Find the {{SOLR_NAME}} cloud scripts in {{SOLR_OPT}}/server/scripts/cloud-scripts. 
+- name: Find the {{ SOLR_NAME }} cloud scripts in {{ SOLR_OPT }}/server/scripts/cloud-scripts. 
   find:
-    paths: "{{SOLR_OPT}}/server/scripts/cloud-scripts"
+    paths: "{{ SOLR_OPT }}/server/scripts/cloud-scripts"
     recurse: no
   register: CLOUD_SCRIPTS
-- name: Make the {{SOLR_NAME}} cloud scripts executable in {{SOLR_OPT}}/server/scripts/cloud-scripts. 
+- name: Make the {{ SOLR_NAME }} cloud scripts executable in {{ SOLR_OPT }}/server/scripts/cloud-scripts. 
   file:
     dest: "{{item.path}}"
     mode: a+x
@@ -106,70 +106,70 @@
   become: yes
 - name: Set sysctl Hard File Limits
   pam_limits:
-    domain: "{{USER_NAME}}"
+    domain: "{{ USER_NAME }}"
     limit_type: hard
     limit_item: nofile
     value: "65000"
   become: yes
 - name: Set sysctl Soft File Limits
   pam_limits:
-    domain: "{{USER_NAME}}"
+    domain: "{{ USER_NAME }}"
     limit_type: soft
     limit_item: nofile
     value: "65000"
   become: yes
 - name: Set sysctl Hard Process Limits
   pam_limits:
-    domain: "{{USER_NAME}}"
+    domain: "{{ USER_NAME }}"
     limit_type: hard
     limit_item: nproc
     value: "65000"
   become: yes
 - name: Set sysctl Soft Process Limits
   pam_limits:
-    domain: "{{USER_NAME}}"
+    domain: "{{ USER_NAME }}"
     limit_type: soft
     limit_item: nproc
     value: "65000"
   become: yes
-- name: Create the {{SOLR_NAME}} systemd service {{SOLR_SYSTEMD}}. 
+- name: Create the {{ SOLR_NAME }} systemd service {{ SOLR_SYSTEMD }}. 
   template:
     src: solr_service.j2
-    dest: "{{SOLR_SYSTEMD}}"
+    dest: "{{ SOLR_SYSTEMD }}"
   become: yes
 - name: Reload the services. 
   systemd:
     daemon_reload: yes
   become: yes
-- name: Start and enable the {{SOLR_NAME}} service. 
+- name: Start and enable the {{ SOLR_NAME }} service. 
   service:
-    name: "{{SOLR_SERVICE}}"
+    name: "{{ SOLR_SERVICE }}"
     enabled: yes
     state: restarted
   become: yes
 - name: Check for existing solr configset computate
-  shell: "{{SOLR_OPT}}/server/scripts/cloud-scripts/zkcli.sh -zkhost localhost:{{ZOOKEEPER_PORT}} -cmd ls /configs/computate"
+  shell: "{{ SOLR_OPT }}/server/scripts/cloud-scripts/zkcli.sh -zkhost localhost:{{ ZOOKEEPER_PORT }} -cmd ls /configs/computate"
   ignore_errors: yes
   register: SOLR_CONFIGSET_EXISTS
   changed_when: false
 - name: Upload computate configset to zookeeper
-  shell: "{{SOLR_OPT}}/bin/solr zk upconfig -n computate -d {{SOLR_OPT}}/server/solr/configsets/computate -z {{ZOOKEEPER_HOST_NAME}}:{{ZOOKEEPER_PORT}}"
+  shell: "{{ SOLR_OPT }}/bin/solr zk upconfig -n computate -d {{ SOLR_OPT }}/server/solr/configsets/computate -z {{ ZOOKEEPER_HOST_NAME }}:{{ ZOOKEEPER_PORT }}"
   when: SOLR_CONFIGSET_EXISTS.rc != 0
 
 #- name: Setup the solr security configuration
 #  template:
 #    src: computate_solr_security.json.j2
-#    dest: "{{SOLR_OPT}}/server/solr/security.json"
+#    dest: "{{ SOLR_OPT }}/server/solr/security.json"
 #- name: Upload security configuration to zookeeper
-#  shell: "{{SOLR_OPT}}/server/scripts/cloud-scripts/zkcli.sh -z {{ZOOKEEPER_HOST_NAME}}:{{ZOOKEEPER_PORT}} -cmd putfile /security.json {{SOLR_OPT}}/server/solr/security.json"
+#  shell: "{{ SOLR_OPT }}/server/scripts/cloud-scripts/zkcli.sh -z {{ ZOOKEEPER_HOST_NAME }}:{{ ZOOKEEPER_PORT }} -cmd putfile /security.json {{ SOLR_OPT }}/server/solr/security.json"
 #
 #- name: Create computate collection in solr
-#  shell: "(SOLR_AUTH_TYPE=basic SOLR_AUTHENTICATION_OPTS='-Dbasicauth={{SOLR_SOLRJ_USER}}:{{SOLR_SOLRJ_PASSWORD}}' {{SOLR_OPT}}/bin/solr create_collection -c computate -n computate)"
+#  shell: "(SOLR_AUTH_TYPE=basic SOLR_AUTHENTICATION_OPTS='-Dbasicauth={{ SOLR_SOLRJ_USER }}:{{ SOLR_SOLRJ_PASSWORD }}' {{ SOLR_OPT }}/bin/solr create_collection -c computate -n computate)"
 - name: Check for existing solr collection computate
-  shell: "{{SOLR_OPT}}/server/scripts/cloud-scripts/zkcli.sh -zkhost localhost:{{ZOOKEEPER_PORT}} -cmd ls /collections/computate"
+  shell: "{{ SOLR_OPT }}/server/scripts/cloud-scripts/zkcli.sh -zkhost localhost:{{ ZOOKEEPER_PORT }} -cmd ls /collections/computate"
   ignore_errors: yes
   register: SOLR_COLLECTION_EXISTS
   changed_when: false
 - name: Create computate collection in solr
-  shell: "{{SOLR_OPT}}/bin/solr create_collection -c computate -n computate"
+  shell: "{{ SOLR_OPT }}/bin/solr create_collection -c computate -n computate"
   when: SOLR_COLLECTION_EXISTS.rc != 0

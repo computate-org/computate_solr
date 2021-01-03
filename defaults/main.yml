@@ -1,14 +1,14 @@
 ---
 SOLR_NAME: solr
-SOLR_SRC: "/usr/local/src/{{SOLR_NAME}}"
-SOLR_OPT: "/opt/{{SOLR_NAME}}"
-SOLR_DATA: "{{SOLR_OPT}}/data"
-SOLR_CONF: "{{SOLR_OPT}}/conf/zoo.cfg"
-SOLR_SYSTEMD: "/usr/lib/systemd/system/{{SOLR_NAME}}.service"
-SOLR_SERVICE: "{{SOLR_NAME}}"
+SOLR_SRC: "/usr/local/src/{{ SOLR_NAME }}"
+SOLR_OPT: "/opt/{{ SOLR_NAME }}"
+SOLR_DATA: "{{ SOLR_OPT }}/data"
+SOLR_CONF: "{{ SOLR_OPT }}/conf/zoo.cfg"
+SOLR_SERVICE: "{{ SOLR_NAME }}"
+SOLR_SYSTEMD: "/usr/lib/systemd/system/{{ SOLR_SERVICE }}.service"
 SOLR_REPO: "https://github.com/apache/lucene-solr.git"
 SOLR_VERSION: 8.6.3
-SOLR_TAG: "releases/lucene-solr/{{SOLR_VERSION}}"
+SOLR_TAG: "releases/lucene-solr/{{ SOLR_VERSION }}"
 SOLR_PORT: 8983
 SOLR_CONFIG: computate
 SOLR_MIRROR_URL: https://archive.apache.org/dist/lucene/solr
