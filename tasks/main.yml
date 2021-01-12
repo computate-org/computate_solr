@@ -7,13 +7,23 @@
   package:
     name: [git,java-latest-openjdk-devel,java-latest-openjdk]
   become: yes
-  when: not JAVAC_EXISTS.stat.exists
+  when: ansible_pkg_mgr != 'homebrew'
+- name: Install {{ SOLR_NAME }} dependencies. 
+  package:
+    name: [openjdk,gnu-tar]
+  when: ansible_pkg_mgr == 'homebrew'
+- name: Link openjdk to Library
+  file:
+    src: /usr/local/opt/openjdk/libexec/openjdk.jdk
+    dest: /Library/Java/JavaVirtualMachines/openjdk.jdk
+    state: link
+  become: true
+  when: ansible_pkg_mgr == 'homebrew'
 - name: Create the {{ SOLR_NAME }} source directory {{ SOLR_SRC }}. 
   file:
     name: "{{ SOLR_SRC }}"
     state: directory
     owner: "{{ USER_NAME }}"
-    group: "{{ USER_NAME }}"
   become: yes
 - name: Check for the solr build.xml
   stat:
@@ -30,7 +40,6 @@
     name: "{{ COMPUTATE_SRC }}"
     state: directory
     owner: "{{ USER_NAME }}"
-    group: "{{ USER_NAME }}"
   become: yes
 - name: Check for the computate pom.xml
   stat:
@@ -46,7 +55,6 @@
     name: "{{ SOLR_OPT }}"
     state: directory
     owner: "{{ USER_NAME }}"
-    group: "{{ USER_NAME }}"
   become: yes
 - name: Install {{ SOLR_NAME }} into the {{ SOLR_OPT }} install directory. 
   unarchive:
@@ -151,18 +159,18 @@
     state: restarted
   become: yes
   when: ansible_pkg_mgr != 'homebrew'
-- name: Create the {{ SOLR_NAME }} launchd service {{ SOLR_SYSTEMD }}.
+- name: Create the {{ SOLR_NAME }} launchd service.
   template:
     src: solr_launchd_service.j2
     dest: "~/Library/LaunchAgents/org.solr.plist"
   when: ansible_pkg_mgr == 'homebrew'
-- name: Load the {{ SOLR_NAME }} launchd service {{ SOLR_SYSTEMD }}.
+- name: Load the {{ SOLR_NAME }} launchd service.
   shell: launchctl load ~/Library/LaunchAgents/org.solr.plist
   when: ansible_pkg_mgr == 'homebrew'
-#- name: Stop the {{ SOLR_NAME }} launchd service {{ SOLR_SYSTEMD }} before restarting it.
+#- name: Stop the {{ SOLR_NAME }} launchd service before restarting it.
 #  shell: /opt/solr/bin/solr stop
 #  when: ansible_pkg_mgr == 'homebrew'
-- name: Start the {{ SOLR_NAME }} launchd service {{ SOLR_SYSTEMD }}.
+- name: Start the {{ SOLR_NAME }} launchd service.
   shell: "{{ SOLR_OPT }}/bin/solr start"
   when: ansible_pkg_mgr == 'homebrew'
   changed_when: false

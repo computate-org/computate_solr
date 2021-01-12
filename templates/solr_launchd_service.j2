@@ -8,8 +8,17 @@
                 <key>ProgramArguments</key>
                 <array>
                         <string>{{ SOLR_OPT }}/bin/solr</string>
-                        <string>-D</string>
-                        <string>{{ SOLR_DATA }}</string>
+                        <string>start</string>
+                        <string>-f</string>
+                        <string>-c</string>
+                        <string>-s</string>
+                        <string>{{ SOLR_OPT }}</string>
+                        <string>-h</string>
+                        <string>localhost</string>
+                        <string>-p</string>
+                        <string>{{ SOLR_PORT }}</string>
+                        <string>-z</string>
+                        <string>{{ ZOOKEEPER_HOST_NAME }}:{{ ZOOKEEPER_PORT }}</string>
                 </array>
 
                 <key>EnvironmentVariables</key>
