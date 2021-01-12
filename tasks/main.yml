@@ -99,6 +99,7 @@
     src: 50-fs.conf.j2
     dest: /etc/sysctl.d/50-fs.conf
   become: yes
+  when: ansible_pkg_mgr != 'homebrew'
 - name: Configure pam login limits
   lineinfile:
     path: /etc/pam.d/login
@@ -137,16 +138,35 @@
     src: solr_service.j2
     dest: "{{ SOLR_SYSTEMD }}"
   become: yes
+  when: ansible_pkg_mgr != 'homebrew'
 - name: Reload the services. 
   systemd:
     daemon_reload: yes
   become: yes
+  when: ansible_pkg_mgr != 'homebrew'
 - name: Start and enable the {{ SOLR_NAME }} service. 
   service:
     name: "{{ SOLR_SERVICE }}"
     enabled: yes
     state: restarted
   become: yes
+  when: ansible_pkg_mgr != 'homebrew'
+- name: Create the {{ SOLR_NAME }} launchd service {{ SOLR_SYSTEMD }}.
+  template:
+    src: solr_launchd_service.j2
+    dest: "~/Library/LaunchAgents/org.solr.plist"
+  when: ansible_pkg_mgr == 'homebrew'
+- name: Load the {{ SOLR_NAME }} launchd service {{ SOLR_SYSTEMD }}.
+  shell: launchctl load ~/Library/LaunchAgents/org.solr.plist
+  when: ansible_pkg_mgr == 'homebrew'
+#- name: Stop the {{ SOLR_NAME }} launchd service {{ SOLR_SYSTEMD }} before restarting it.
+#  shell: /opt/solr/bin/solr stop
+#  when: ansible_pkg_mgr == 'homebrew'
+- name: Start the {{ SOLR_NAME }} launchd service {{ SOLR_SYSTEMD }}.
+  shell: "{{ SOLR_OPT }}/bin/solr start"
+  when: ansible_pkg_mgr == 'homebrew'
+  changed_when: false
+
 - name: Check for existing solr configset computate
   shell: "{{ SOLR_OPT }}/server/scripts/cloud-scripts/zkcli.sh -zkhost localhost:{{ ZOOKEEPER_PORT }} -cmd ls /configs/computate"
   ignore_errors: yes
@@ -171,5 +191,5 @@
   register: SOLR_COLLECTION_EXISTS
   changed_when: false
 - name: Create computate collection in solr
-  shell: "{{ SOLR_OPT }}/bin/solr create_collection -c computate -n computate"
+  shell: "{{ SOLR_OPT }}/bin/solr create -c computate -n computate"
   when: SOLR_COLLECTION_EXISTS.rc != 0
