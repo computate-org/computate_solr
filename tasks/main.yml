@@ -167,11 +167,8 @@
 - name: Load the {{ SOLR_NAME }} launchd service.
   shell: launchctl load ~/Library/LaunchAgents/org.solr.plist
   when: ansible_pkg_mgr == 'homebrew'
-#- name: Stop the {{ SOLR_NAME }} launchd service before restarting it.
-#  shell: /opt/solr/bin/solr stop
-#  when: ansible_pkg_mgr == 'homebrew'
 - name: Start the {{ SOLR_NAME }} launchd service.
-  shell: "{{ SOLR_OPT }}/bin/solr start"
+  shell: launchctl start org.solr
   when: ansible_pkg_mgr == 'homebrew'
   changed_when: false
 
