@@ -1,26 +1,18 @@
 ---
-- name: Check if javac command exists
-  stat:
-    path: /usr/bin/javac
-  register: JAVAC_EXISTS
-- name: Install {{ SOLR_NAME }} dependencies. 
+- debug:
+    var: APP_PYTHON
+- name: "install podman dependency"
   package:
-    name: [git,java-1.8.0-openjdk]
-  become: yes
-  vars:
-    ansible_python_interpreter: /usr/bin/python
-  when: ansible_pkg_mgr != 'homebrew'
-- name: Install {{ SOLR_NAME }} dependencies. 
-  package:
-    name: [openjdk,gnu-tar]
-  when: ansible_pkg_mgr == 'homebrew'
-- name: Link openjdk to Library
-  file:
-    src: /usr/local/opt/openjdk/libexec/openjdk.jdk
-    dest: /Library/Java/JavaVirtualMachines/openjdk.jdk
-    state: link
+    name: "podman"
+    state: present
   become: true
-  when: ansible_pkg_mgr == 'homebrew'
+  vars:
+    ansible_python_interpreter: "{{ APP_PYTHON }}"
+- name: Set container_manage_cgroup flag on to run podman containers as systemd services and keep it persistent across reboots
+  ansible.posix.seboolean:
+    name: container_manage_cgroup
+    state: true
+    persistent: true
 - name: Create the {{ SOLR_NAME }} source directory {{ SOLR_SRC }}. 
   file:
     name: "{{ SOLR_SRC }}"
@@ -73,76 +65,11 @@
     src: "{{ SOLR_OPT }}/server/solr/solr.xml"
     dest: "{{ SOLR_OPT }}/solr.xml"
     remote_src: yes
-- name: Delete the example directory {{ SOLR_OPT }}/example. 
-  file:
-    name: "{{ SOLR_OPT }}/example"
-    state: absent
 - name: Link the computate configset into {{ SOLR_NAME }}. 
   file:
     src: "{{ COMPUTATE_SRC }}/config/solr/server/solr/configsets/computate"
     dest: "{{ SOLR_OPT }}/server/solr/configsets/computate"
     state: link
-- name: Find the {{ SOLR_NAME }} binaries in {{ SOLR_OPT }}/bin. 
-  find:
-    paths: "{{ SOLR_OPT }}/bin"
-    recurse: no
-  register: BIN_FILES
-- name: Make the {{ SOLR_NAME }} binaries executable in {{ SOLR_OPT }}/bin. 
-  file:
-    dest: "{{item.path}}"
-    mode: a+x
-  with_items:
-    - "{{BIN_FILES.files}}"
-- name: Find the {{ SOLR_NAME }} cloud scripts in {{ SOLR_OPT }}/server/scripts/cloud-scripts. 
-  find:
-    paths: "{{ SOLR_OPT }}/server/scripts/cloud-scripts"
-    recurse: no
-  register: CLOUD_SCRIPTS
-- name: Make the {{ SOLR_NAME }} cloud scripts executable in {{ SOLR_OPT }}/server/scripts/cloud-scripts. 
-  file:
-    dest: "{{item.path}}"
-    mode: a+x
-  with_items:
-    - "{{CLOUD_SCRIPTS.files}}"
-- name: Set sysctl File Limits
-  template:
-    src: 50-fs.conf.j2
-    dest: /etc/sysctl.d/50-fs.conf
-  become: yes
-  when: ansible_pkg_mgr != 'homebrew'
-- name: Configure pam login limits
-  lineinfile:
-    path: /etc/pam.d/login
-    line: "session    required     pam_limits.so"
-  become: yes
-- name: Set sysctl Hard File Limits
-  pam_limits:
-    domain: "{{ USER_NAME }}"
-    limit_type: hard
-    limit_item: nofile
-    value: "65000"
-  become: yes
-- name: Set sysctl Soft File Limits
-  pam_limits:
-    domain: "{{ USER_NAME }}"
-    limit_type: soft
-    limit_item: nofile
-    value: "65000"
-  become: yes
-- name: Set sysctl Hard Process Limits
-  pam_limits:
-    domain: "{{ USER_NAME }}"
-    limit_type: hard
-    limit_item: nproc
-    value: "65000"
-  become: yes
-- name: Set sysctl Soft Process Limits
-  pam_limits:
-    domain: "{{ USER_NAME }}"
-    limit_type: soft
-    limit_item: nproc
-    value: "65000"
-  become: yes
 - name: Create the {{ SOLR_NAME }} systemd service {{ SOLR_SYSTEMD }}. 
   template:
     src: solr_service.j2

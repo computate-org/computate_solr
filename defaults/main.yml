@@ -1,21 +1,22 @@
 ---
-SOLR_NAME: solr
-SOLR_SRC: "/usr/local/src/{{ SOLR_NAME }}"
-SOLR_OPT: "/opt/{{ SOLR_NAME }}"
-SOLR_DATA: "{{ SOLR_OPT }}/data"
-SOLR_CONF: "{{ SOLR_OPT }}/conf/zoo.cfg"
-SOLR_SERVICE: "{{ SOLR_NAME }}"
-SOLR_SYSTEMD: "/usr/lib/systemd/system/{{ SOLR_SERVICE }}.service"
-SOLR_REPO: "https://github.com/apache/lucene-solr.git"
-SOLR_VERSION: 8.6.3
-SOLR_TAG: "releases/lucene-solr/{{ SOLR_VERSION }}"
-SOLR_PORT: 8983
-SOLR_CONFIG: computate
-SOLR_MIRROR_URL: https://archive.apache.org/dist/lucene/solr
-SOLR_DOWNLOAD_FILENAME: "{{ SOLR_NAME }}-{{ SOLR_VERSION }}.tgz"
-SOLR_DOWNLOAD_URL: "{{ SOLR_MIRROR_URL }}/{{ SOLR_VERSION }}/{{ SOLR_DOWNLOAD_FILENAME }}"
-SOLR_DOWNLOAD_DEST: "/tmp/{{ SOLR_DOWNLOAD_FILENAME }}"
-SOLR_DOWNLOAD_SHA512: f040d4489118b655bd27451a717c1f22f180c398638d944a53889a1a449e7032b016cecbff1979c2e8bfd51fc037dd613f3b968254001d34fe0e8fc4f6761dcf
+APP_NAME: solr
+APP_PYTHON: "{{ '/usr/bin/python' if lookup('file', '/usr/bin/python', errors='ignore') is defined else '/usr/bin/python3' }}"
+APP_SRC: "/usr/local/src/{{ APP_NAME }}"
+APP_OPT: "/opt/{{ APP_NAME }}"
+APP_DATA: "{{ APP_OPT }}/data"
+APP_CONF: "{{ APP_OPT }}/conf/zoo.cfg"
+APP_SERVICE: "{{ APP_NAME }}"
+APP_SYSTEMD: "/usr/lib/systemd/system/{{ APP_SERVICE }}.service"
+APP_REPO: "https://github.com/apache/lucene-solr.git"
+APP_VERSION: 8.6.3
+APP_TAG: "releases/lucene-solr/{{ APP_VERSION }}"
+APP_PORT: 8983
+APP_CONFIG: computate
+APP_MIRROR_URL: https://archive.apache.org/dist/lucene/solr
+APP_DOWNLOAD_FILENAME: "{{ APP_NAME }}-{{ APP_VERSION }}.tgz"
+APP_DOWNLOAD_URL: "{{ APP_MIRROR_URL }}/{{ APP_VERSION }}/{{ APP_DOWNLOAD_FILENAME }}"
+APP_DOWNLOAD_DEST: "/tmp/{{ APP_DOWNLOAD_FILENAME }}"
+APP_DOWNLOAD_SHA512: f040d4489118b655bd27451a717c1f22f180c398638d944a53889a1a449e7032b016cecbff1979c2e8bfd51fc037dd613f3b968254001d34fe0e8fc4f6761dcf
 COMPUTATE_REPO: https://github.com/computate-org/computate.git
 COMPUTATE_SRC: /usr/local/src/computate
 ZOOKEEPER_HOST_NAME: localhost
