@@ -4,10 +4,9 @@ After=network.target
 
 [Service]
 Type=simple
-User={{ USER_NAME }}
-Group={{ USER_NAME }}
-WorkingDirectory={{ SOLR_OPT }}
-ExecStart=/usr/bin/podman --name {{ APP_NAME }} -v {{ SOLR_DATA }}:{{ SOLR_DATA }} -h localhost -p {{ SOLR_PORT }}:{{ SOLR_PORT }} {{ APP_NAME }}
+WorkingDirectory={{ APP_OPT }}
+ExecStart=/usr/bin/podman run -v {{ APP_DATA }}:{{ APP_DATA }} -h localhost -p {{ APP_PORT }}:{{ APP_PORT }} -h localhost {{ APP_NAME }}:{{ APP_VERSION }}
+ExecStop=/usr/bin/podman stop -t 2 {{ APP_NAME }}
 Environment=ZK_HOSTNAME={{ ZOOKEEPER_HOST_NAME }}
 LimitNOFILE=65000
 LimitNPROC=65000
