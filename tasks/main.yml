@@ -56,6 +56,9 @@
   file:
     name: "{{ APP_DATA }}"
     state: directory
+    owner: root
+    mode: 0777
+  become: true
 - name: set SELinux permissions on {{ APP_DATA }}
   sefcontext:
     target: "{{ APP_DATA }}"
@@ -69,6 +72,7 @@
     src: "{{ APP_OPT }}/server/solr/solr.xml"
     dest: "{{ APP_OPT }}/solr.xml"
     remote_src: true
+  become: true
 - name: Link the computate configset into {{ APP_NAME }}. 
   file:
     src: "{{ COMPUTATE_SRC }}/config/solr/server/solr/configsets/computate"
