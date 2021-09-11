@@ -24,7 +24,6 @@
   get_url:
     url: "{{ APP_DOWNLOAD_URL }}"
     dest: "{{ APP_DOWNLOAD_DEST }}"
-    checksum: "sha512:{{ APP_DOWNLOAD_SHA512 }}"
   when: not APP_DOWNLOAD.stat.exists
 - name: Create the computate source directory {{ COMPUTATE_SRC }}
   file:
