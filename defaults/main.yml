@@ -12,6 +12,7 @@ APP_REPO: "https://github.com/apache/lucene-solr.git"
 APP_VERSION: 8.9.0
 APP_TAG: "releases/lucene-solr/{{ APP_VERSION }}"
 APP_PORT: 8983
+APP_USER: "root"
 APP_CONFIG: computate
 APP_MIRROR_URL: https://archive.apache.org/dist/lucene/solr
 APP_DOWNLOAD_FILENAME: "{{ APP_NAME }}-{{ APP_VERSION }}.tgz"
@@ -20,7 +21,7 @@ APP_DOWNLOAD_DEST: "~/Downloads/{{ APP_DOWNLOAD_FILENAME }}"
 APP_DOWNLOAD_SHA512: 15150b7f191fd9e8d2c1bd8bb619dd4b3f27af2e0e94b7609031f7e745a2e263391c30f68865c208afb97ccaa9bde6d16050200e9bfccef65f762c2ed743c242
 COMPUTATE_REPO: https://github.com/computate-org/computate.git
 COMPUTATE_SRC: /usr/local/src/computate
-ZOOKEEPER_HOST_NAME: localhost
+ZOOKEEPER_HOST_NAME: "{{ lookup('env', 'HOSTNAME') }}"
 ZOOKEEPER_PORT: 2181
 
 ####################

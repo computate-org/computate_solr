@@ -56,7 +56,7 @@
   file:
     name: "{{ APP_DATA }}"
     state: directory
-    owner: root
+    owner: "{{ APP_USER }}"
     mode: 0777
   become: true
 - name: set SELinux permissions on {{ APP_DATA }}
