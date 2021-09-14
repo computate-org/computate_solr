@@ -81,6 +81,8 @@
     target: "{{ APP_DATA }}"
     setype: container_file_t
   become: true
+  vars:
+    ansible_python_interpreter: "{{ APP_PYTHON }}"
 - name: reload SELinux policy to ensure that {{ APP_NAME }} is executable
   command: "restorecon -irv {{ APP_DATA }}"
   become: true
@@ -95,6 +97,21 @@
     src: "{{ COMPUTATE_SRC }}/config/solr/server/solr/configsets/computate"
     dest: "{{ APP_OPT }}/server/solr/configsets/computate"
     state: link
+- name: Create a podman pod named {{ APP_POD }}
+  containers.podman.podman_pod:
+    name: "{{ APP_POD }}"
+    state: started
+    ports:
+      - "{{ ZOOKEEPER_PORT }}"
+      - "{{ APP_PORT }}"
+  become: true
+- name: Restart the firewalld service
+  service:
+    name: firewalld
+    enabled: true
+    state: restarted
+  become: true
+  when: ansible_pkg_mgr != 'homebrew'
 - name: Create the {{ APP_NAME }} systemd service {{ APP_SYSTEMD }}. 
   template:
     src: solr_service.j2
@@ -109,13 +126,6 @@
 - name: Start and enable the {{ APP_NAME }} service. 
   service:
     name: "{{ APP_SERVICE }}"
-    enabled: true
-    state: restarted
-  become: true
-  when: ansible_pkg_mgr != 'homebrew'
-- name: Restart the firewalld service
-  service:
-    name: firewalld
     enabled: true
     state: restarted
   become: true
