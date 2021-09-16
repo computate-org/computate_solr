@@ -1,6 +1,9 @@
 ---
 APP_NAME: solr
-APP_PYTHON: "{{ '/usr/bin/python' if lookup('file', '/usr/bin/python', errors='ignore') is defined else '/usr/bin/python3' }}"
+APP_POD: "computate"
+APP_NETWORK: "computate"
+ZOOKEEPER_POD: "zookeeper"
+APP_PYTHON: "{{ '/usr/bin/python' if lookup('file', '/usr/bin/python', errors='ignore') else '/usr/bin/python3' }}"
 APP_SRC: "/usr/local/src/{{ APP_NAME }}"
 APP_OPT: "/opt/{{ APP_NAME }}"
 APP_VAR: "/var/{{ APP_NAME }}"
@@ -21,7 +24,7 @@ APP_DOWNLOAD_DEST: "~/Downloads/{{ APP_DOWNLOAD_FILENAME }}"
 APP_DOWNLOAD_SHA512: 15150b7f191fd9e8d2c1bd8bb619dd4b3f27af2e0e94b7609031f7e745a2e263391c30f68865c208afb97ccaa9bde6d16050200e9bfccef65f762c2ed743c242
 COMPUTATE_REPO: https://github.com/computate-org/computate.git
 COMPUTATE_SRC: /usr/local/src/computate
-ZOOKEEPER_HOST_NAME: "{{ lookup('env', 'HOSTNAME') }}"
+ZOOKEEPER_HOST_NAME: "{{ APP_POD }}"
 ZOOKEEPER_PORT: 2181
 
 ####################
