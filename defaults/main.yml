@@ -15,6 +15,7 @@ APP_REPO: "https://github.com/apache/lucene-solr.git"
 APP_VERSION: 8.9.0
 APP_TAG: "releases/lucene-solr/{{ APP_VERSION }}"
 APP_PORT: 8983
+ZOOKEEPER_PORT: 2181
 APP_USER: "root"
 APP_CONFIG: computate
 APP_MIRROR_URL: https://archive.apache.org/dist/lucene/solr
