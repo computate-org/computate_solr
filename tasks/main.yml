@@ -128,6 +128,11 @@
   when: ansible_pkg_mgr == 'homebrew'
   changed_when: false
 
+- name: "hold until Solr is up and running at http://localhost:{{ APP_PORT }}"
+  wait_for:
+    host: "localhost"
+    port: "{{ APP_PORT }}"
+
 - name: Check for existing solr configset computate
   shell: "{{ APP_OPT }}/server/scripts/cloud-scripts/zkcli.sh -zkhost localhost:{{ ZOOKEEPER_PORT }} -cmd ls /configs/computate"
   ignore_errors: true
