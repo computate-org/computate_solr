@@ -1,28 +1,23 @@
 ---
-- name: "install podman dependency"
+- name: "install Ansible dependencies"
   package:
     name:
       - python3
       - python3-pip
       - libselinux-python
       - libsemanage-python
-      - podman
     state: present
   become: true
-  when: ansible_pkg_mgr != 'homebrew' and APP_PYTHON == '/usr/bin/python'
+  when: APP_USE_PODMAN and ansible_pkg_mgr != 'homebrew' and APP_PYTHON == '/usr/bin/python'
   vars:
     ansible_python_interpreter: "{{ APP_PYTHON }}"
 - name: "install podman dependency"
   package:
     name:
-      - python3
-      - python3-pip
-      - python3-libselinux
-      - python3-libsemanage
       - podman
     state: present
   become: true
-  when: ansible_pkg_mgr != 'homebrew' and APP_PYTHON == '/usr/bin/python3'
+  when: APP_USE_PODMAN and ansible_pkg_mgr != 'homebrew' and APP_PYTHON == '/usr/bin/python3'
   vars:
     ansible_python_interpreter: "{{ APP_PYTHON }}"
 - name: Set container_manage_cgroup flag on to run podman containers as systemd services and keep it persistent across reboots
@@ -33,6 +28,31 @@
   become: true
   vars:
     ansible_python_interpreter: "{{ APP_PYTHON }}"
+  when: APP_USE_PODMAN
+- name: Check if javac command exists
+  stat:
+    path: /usr/bin/javac
+  register: JAVAC_EXISTS
+- name: Install {{ APP_NAME }} dependencies. 
+  package:
+    name: [git,java-1.8.0-openjdk]
+    state: present
+  become: yes
+  vars:
+    ansible_python_interpreter: "{{ APP_PYTHON }}"
+  when: ansible_pkg_mgr != 'homebrew'
+- name: Install {{ APP_NAME }} dependencies. 
+  package:
+    name: [openjdk,gnu-tar]
+    state: present
+  when: ansible_pkg_mgr == 'homebrew'
+- name: Link openjdk to Library
+  file:
+    src: /usr/local/opt/openjdk/libexec/openjdk.jdk
+    dest: /Library/Java/JavaVirtualMachines/openjdk.jdk
+    state: link
+  become: true
+  when: ansible_pkg_mgr == 'homebrew'
 - name: Check for the {{ APP_NAME }} download
   stat:
     path: "{{ APP_DOWNLOAD_DEST }}"
@@ -83,20 +103,48 @@
   become: true
   vars:
     ansible_python_interpreter: "{{ APP_PYTHON }}"
+  when: APP_USE_PODMAN
 - name: reload SELinux policy to ensure that {{ APP_NAME }} is executable
   command: "restorecon -irv {{ APP_DATA }}"
   become: true
+  when: APP_USE_PODMAN
 - name: Copy the solr.xml to the {{ APP_NAME }} directory {{ APP_DATA }}. 
   copy:
     src: "{{ APP_OPT }}/server/solr/solr.xml"
     dest: "{{ APP_OPT }}/solr.xml"
     remote_src: true
   become: true
+- name: Delete the example directory {{ APP_OPT }}/example. 
+  file:
+    name: "{{ APP_OPT }}/example"
+    state: absent
 - name: Link the computate configset into {{ APP_NAME }}. 
   file:
     src: "{{ COMPUTATE_SRC }}/config/solr/server/solr/configsets/computate"
     dest: "{{ APP_OPT }}/server/solr/configsets/computate"
     state: link
+- name: Find the {{ APP_NAME }} binaries in {{ APP_OPT }}/bin. 
+  find:
+    paths: "{{ APP_OPT }}/bin"
+    recurse: no
+  register: BIN_FILES
+- name: Make the {{ APP_NAME }} binaries executable in {{ APP_OPT }}/bin. 
+  file:
+    dest: "{{item.path}}"
+    mode: a+x
+  with_items:
+    - "{{BIN_FILES.files}}"
+- name: Find the {{ APP_NAME }} cloud scripts in {{ APP_OPT }}/server/scripts/cloud-scripts. 
+  find:
+    paths: "{{ APP_OPT }}/server/scripts/cloud-scripts"
+    recurse: no
+  register: CLOUD_SCRIPTS
+- name: Make the {{ APP_NAME }} cloud scripts executable in {{ APP_OPT }}/server/scripts/cloud-scripts. 
+  file:
+    dest: "{{item.path}}"
+    mode: a+x
+  with_items:
+    - "{{CLOUD_SCRIPTS.files}}"
 - name: Create the {{ APP_NAME }} systemd service {{ APP_SYSTEMD }}. 
   template:
     src: solr_service.j2
