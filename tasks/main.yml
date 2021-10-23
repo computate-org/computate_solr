@@ -8,18 +8,18 @@
       - libsemanage-python
     state: present
   become: true
-  when: APP_USE_PODMAN and ansible_pkg_mgr != 'homebrew' and APP_PYTHON == '/usr/bin/python'
+  when: SOLR_USE_PODMAN and ansible_pkg_mgr != 'homebrew' and SOLR_PYTHON == '/usr/bin/python'
   vars:
-    ansible_python_interpreter: "{{ APP_PYTHON }}"
+    ansible_python_interpreter: "{{ SOLR_PYTHON }}"
 - name: "install podman dependency"
   package:
     name:
       - podman
     state: present
   become: true
-  when: APP_USE_PODMAN and ansible_pkg_mgr != 'homebrew' and APP_PYTHON == '/usr/bin/python3'
+  when: SOLR_USE_PODMAN and ansible_pkg_mgr != 'homebrew' and SOLR_PYTHON == '/usr/bin/python3'
   vars:
-    ansible_python_interpreter: "{{ APP_PYTHON }}"
+    ansible_python_interpreter: "{{ SOLR_PYTHON }}"
 - name: Set container_manage_cgroup flag on to run podman containers as systemd services and keep it persistent across reboots
   ansible.posix.seboolean:
     name: container_manage_cgroup
@@ -27,21 +27,21 @@
     persistent: true
   become: true
   vars:
-    ansible_python_interpreter: "{{ APP_PYTHON }}"
-  when: APP_USE_PODMAN
+    ansible_python_interpreter: "{{ SOLR_PYTHON }}"
+  when: SOLR_USE_PODMAN
 - name: Check if javac command exists
   stat:
     path: /usr/bin/javac
   register: JAVAC_EXISTS
-- name: Install {{ APP_NAME }} dependencies. 
+- name: Install {{ SOLR_NAME }} dependencies. 
   package:
     name: [git,java-1.8.0-openjdk]
     state: present
   become: yes
   vars:
-    ansible_python_interpreter: "{{ APP_PYTHON }}"
+    ansible_python_interpreter: "{{ SOLR_PYTHON }}"
   when: ansible_pkg_mgr != 'homebrew'
-- name: Install {{ APP_NAME }} dependencies. 
+- name: Install {{ SOLR_NAME }} dependencies. 
   package:
     name: [openjdk,gnu-tar]
     state: present
@@ -53,15 +53,15 @@
     state: link
   become: true
   when: ansible_pkg_mgr == 'homebrew'
-- name: Check for the {{ APP_NAME }} download
+- name: Check for the {{ SOLR_NAME }} download
   stat:
-    path: "{{ APP_DOWNLOAD_DEST }}"
-  register: APP_DOWNLOAD
+    path: "{{ SOLR_DOWNLOAD_DEST }}"
+  register: SOLR_DOWNLOAD
 - name: Download the Solr binary
   get_url:
-    url: "{{ APP_DOWNLOAD_URL }}"
-    dest: "{{ APP_DOWNLOAD_DEST }}"
-  when: not APP_DOWNLOAD.stat.exists
+    url: "{{ SOLR_DOWNLOAD_URL }}"
+    dest: "{{ SOLR_DOWNLOAD_DEST }}"
+  when: not SOLR_DOWNLOAD.stat.exists
 - name: Create the computate source directory {{ COMPUTATE_SRC }}
   file:
     name: "{{ COMPUTATE_SRC }}"
@@ -77,78 +77,78 @@
     repo: "{{ COMPUTATE_REPO }}"
     dest: "{{ COMPUTATE_SRC }}"
   when: not computate_pom.stat.exists
-- name: Create the {{ APP_NAME }} install directory {{ APP_OPT }}. 
+- name: Create the {{ SOLR_NAME }} install directory {{ SOLR_OPT }}. 
   file:
-    name: "{{ APP_OPT }}"
+    name: "{{ SOLR_OPT }}"
     state: directory
     owner: "{{ USER_NAME }}"
   become: true
-- name: Install {{ APP_NAME }} into the {{ APP_OPT }} install directory. 
+- name: Install {{ SOLR_NAME }} into the {{ SOLR_OPT }} install directory. 
   unarchive:
-    src: "{{ APP_DOWNLOAD_DEST }}"
-    dest: "{{ APP_OPT }}"
+    src: "{{ SOLR_DOWNLOAD_DEST }}"
+    dest: "{{ SOLR_OPT }}"
     remote_src: true
     extra_opts: [--strip-components=1]
-- name: Create the {{ APP_NAME }} data directory {{ APP_DATA }}. 
+- name: Create the {{ SOLR_NAME }} data directory {{ SOLR_DATA }}. 
   file:
-    name: "{{ APP_DATA }}"
+    name: "{{ SOLR_DATA }}"
     state: directory
-    owner: "{{ APP_USER }}"
+    owner: "{{ SOLR_USER }}"
     mode: 0777
   become: true
-- name: set SELinux permissions on {{ APP_DATA }}
+- name: set SELinux permissions on {{ SOLR_DATA }}
   sefcontext:
-    target: "{{ APP_DATA }}"
+    target: "{{ SOLR_DATA }}"
     setype: container_file_t
   become: true
   vars:
-    ansible_python_interpreter: "{{ APP_PYTHON }}"
-  when: APP_USE_PODMAN
-- name: reload SELinux policy to ensure that {{ APP_NAME }} is executable
-  command: "restorecon -irv {{ APP_DATA }}"
+    ansible_python_interpreter: "{{ SOLR_PYTHON }}"
+  when: SOLR_USE_PODMAN
+- name: reload SELinux policy to ensure that {{ SOLR_NAME }} is executable
+  command: "restorecon -irv {{ SOLR_DATA }}"
   become: true
-  when: APP_USE_PODMAN
-- name: Copy the solr.xml to the {{ APP_NAME }} directory {{ APP_DATA }}. 
+  when: SOLR_USE_PODMAN
+- name: Copy the solr.xml to the {{ SOLR_NAME }} directory {{ SOLR_DATA }}. 
   copy:
-    src: "{{ APP_OPT }}/server/solr/solr.xml"
-    dest: "{{ APP_OPT }}/solr.xml"
+    src: "{{ SOLR_OPT }}/server/solr/solr.xml"
+    dest: "{{ SOLR_OPT }}/solr.xml"
     remote_src: true
   become: true
-- name: Delete the example directory {{ APP_OPT }}/example. 
+- name: Delete the example directory {{ SOLR_OPT }}/example. 
   file:
-    name: "{{ APP_OPT }}/example"
+    name: "{{ SOLR_OPT }}/example"
     state: absent
-- name: Link the computate configset into {{ APP_NAME }}. 
+- name: Link the computate configset into {{ SOLR_NAME }}. 
   file:
     src: "{{ COMPUTATE_SRC }}/config/solr/server/solr/configsets/computate"
-    dest: "{{ APP_OPT }}/server/solr/configsets/computate"
+    dest: "{{ SOLR_OPT }}/server/solr/configsets/computate"
     state: link
-- name: Find the {{ APP_NAME }} binaries in {{ APP_OPT }}/bin. 
+- name: Find the {{ SOLR_NAME }} binaries in {{ SOLR_OPT }}/bin. 
   find:
-    paths: "{{ APP_OPT }}/bin"
+    paths: "{{ SOLR_OPT }}/bin"
     recurse: no
   register: BIN_FILES
-- name: Make the {{ APP_NAME }} binaries executable in {{ APP_OPT }}/bin. 
+- name: Make the {{ SOLR_NAME }} binaries executable in {{ SOLR_OPT }}/bin. 
   file:
     dest: "{{item.path}}"
     mode: a+x
   with_items:
     - "{{BIN_FILES.files}}"
-- name: Find the {{ APP_NAME }} cloud scripts in {{ APP_OPT }}/server/scripts/cloud-scripts. 
+- name: Find the {{ SOLR_NAME }} cloud scripts in {{ SOLR_OPT }}/server/scripts/cloud-scripts. 
   find:
-    paths: "{{ APP_OPT }}/server/scripts/cloud-scripts"
+    paths: "{{ SOLR_OPT }}/server/scripts/cloud-scripts"
     recurse: no
   register: CLOUD_SCRIPTS
-- name: Make the {{ APP_NAME }} cloud scripts executable in {{ APP_OPT }}/server/scripts/cloud-scripts. 
+- name: Make the {{ SOLR_NAME }} cloud scripts executable in {{ SOLR_OPT }}/server/scripts/cloud-scripts. 
   file:
     dest: "{{item.path}}"
     mode: a+x
   with_items:
     - "{{CLOUD_SCRIPTS.files}}"
-- name: Create the {{ APP_NAME }} systemd service {{ APP_SYSTEMD }}. 
+- name: Create the {{ SOLR_NAME }} systemd service {{ SOLR_SYSTEMD }}. 
   template:
     src: solr_service.j2
-    dest: "{{ APP_SYSTEMD }}"
+    dest: "{{ SOLR_SYSTEMD }}"
   become: true
   when: ansible_pkg_mgr != 'homebrew'
 - name: Reload the services. 
@@ -156,54 +156,54 @@
     daemon_reload: true
   become: true
   when: ansible_pkg_mgr != 'homebrew'
-- name: Start and enable the {{ APP_NAME }} service. 
+- name: Start and enable the {{ SOLR_NAME }} service. 
   service:
-    name: "{{ APP_SERVICE }}"
+    name: "{{ SOLR_SERVICE }}"
     enabled: true
     state: restarted
   become: true
   when: ansible_pkg_mgr != 'homebrew'
-- name: Create the {{ APP_NAME }} launchd service.
+- name: Create the {{ SOLR_NAME }} launchd service.
   template:
     src: solr_launchd_service.j2
     dest: "~/Library/LaunchAgents/org.solr.plist"
   when: ansible_pkg_mgr == 'homebrew'
-- name: Load the {{ APP_NAME }} launchd service.
+- name: Load the {{ SOLR_NAME }} launchd service.
   shell: launchctl load ~/Library/LaunchAgents/org.solr.plist
   when: ansible_pkg_mgr == 'homebrew'
-- name: Start the {{ APP_NAME }} launchd service.
+- name: Start the {{ SOLR_NAME }} launchd service.
   shell: launchctl start org.solr
   when: ansible_pkg_mgr == 'homebrew'
   changed_when: false
 
-- name: "hold until Solr is up and running at http://localhost:{{ APP_PORT }}"
+- name: "hold until Solr is up and running at http://localhost:{{ SOLR_PORT }}"
   wait_for:
     host: "localhost"
-    port: "{{ APP_PORT }}"
+    port: "{{ SOLR_PORT }}"
 
 - name: Check for existing solr configset computate
-  shell: "{{ APP_OPT }}/server/scripts/cloud-scripts/zkcli.sh -zkhost localhost:{{ ZOOKEEPER_PORT }} -cmd ls /configs/computate"
+  shell: "{{ SOLR_OPT }}/server/scripts/cloud-scripts/zkcli.sh -zkhost localhost:{{ ZOOKEEPER_PORT }} -cmd ls /configs/computate"
   ignore_errors: true
-  register: APP_CONFIGSET_EXISTS
+  register: SOLR_CONFIGSET_EXISTS
   changed_when: false
 - name: Upload computate configset to zookeeper
-  shell: "{{ APP_OPT }}/bin/solr zk upconfig -n computate -d {{ APP_OPT }}/server/solr/configsets/computate -z {{ ZOOKEEPER_HOST_NAME }}:{{ ZOOKEEPER_PORT }}"
-  when: APP_CONFIGSET_EXISTS.rc != 0
+  shell: "{{ SOLR_OPT }}/bin/solr zk upconfig -n computate -d {{ SOLR_OPT }}/server/solr/configsets/computate -z {{ ZOOKEEPER_HOST_NAME }}:{{ ZOOKEEPER_PORT }}"
+  when: SOLR_CONFIGSET_EXISTS.rc != 0
 
 #- name: Setup the solr security configuration
 #  template:
 #    src: computate_solr_security.json.j2
-#    dest: "{{ APP_OPT }}/server/solr/security.json"
+#    dest: "{{ SOLR_OPT }}/server/solr/security.json"
 #- name: Upload security configuration to zookeeper
-#  shell: "{{ APP_OPT }}/server/scripts/cloud-scripts/zkcli.sh -z {{ ZOOKEEPER_HOST_NAME }}:{{ ZOOKEEPER_PORT }} -cmd putfile /security.json {{ APP_OPT }}/server/solr/security.json"
+#  shell: "{{ SOLR_OPT }}/server/scripts/cloud-scripts/zkcli.sh -z {{ ZOOKEEPER_HOST_NAME }}:{{ ZOOKEEPER_PORT }} -cmd putfile /security.json {{ SOLR_OPT }}/server/solr/security.json"
 #
 #- name: Create computate collection in solr
-#  shell: "(APP_AUTH_TYPE=basic APP_AUTHENTICATION_OPTS='-Dbasicauth={{ APP_SOLRJ_USER }}:{{ APP_SOLRJ_PASSWORD }}' {{ APP_OPT }}/bin/solr create_collection -c computate -n computate)"
+#  shell: "(SOLR_AUTH_TYPE=basic SOLR_AUTHENTICATION_OPTS='-Dbasicauth={{ SOLR_SOLRJ_USER }}:{{ SOLR_SOLRJ_PASSWORD }}' {{ SOLR_OPT }}/bin/solr create_collection -c computate -n computate)"
 - name: Check for existing solr collection computate
-  shell: "{{ APP_OPT }}/server/scripts/cloud-scripts/zkcli.sh -zkhost localhost:{{ ZOOKEEPER_PORT }} -cmd ls /collections/computate"
+  shell: "{{ SOLR_OPT }}/server/scripts/cloud-scripts/zkcli.sh -zkhost localhost:{{ ZOOKEEPER_PORT }} -cmd ls /collections/computate"
   ignore_errors: true
-  register: APP_COLLECTION_EXISTS
+  register: SOLR_COLLECTION_EXISTS
   changed_when: false
 - name: Create computate collection in solr
-  shell: "{{ APP_OPT }}/bin/solr create -c computate -n computate"
-  when: APP_COLLECTION_EXISTS.rc != 0
+  shell: "{{ SOLR_OPT }}/bin/solr create -c computate -n computate"
+  when: SOLR_COLLECTION_EXISTS.rc != 0

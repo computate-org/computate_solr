@@ -1,30 +1,30 @@
 ---
-APP_NAME: solr
-APP_NETWORK: "host"
-APP_PYTHON: "{{ '/usr/bin/python' if lookup('file', '/usr/bin/python', errors='ignore') else '/usr/bin/python3' }}"
-APP_SRC: "/usr/local/src/{{ APP_NAME }}"
-APP_OPT: "/opt/{{ APP_NAME }}"
-APP_VAR: "/var/{{ APP_NAME }}"
-APP_DATA: "{{ APP_VAR }}/data"
-APP_CONF: "{{ APP_OPT }}/conf/zoo.cfg"
-APP_SERVICE: "{{ APP_NAME }}"
-APP_SYSTEMD: "/usr/lib/systemd/system/{{ APP_SERVICE }}.service"
-APP_REPO: "https://github.com/apache/lucene-solr.git"
-APP_VERSION: 8.9.0
-APP_TAG: "releases/lucene-solr/{{ APP_VERSION }}"
-APP_PORT: 8983
+SOLR_NAME: solr
+SOLR_NETWORK: "host"
+SOLR_PYTHON: "{{ '/usr/bin/python' if lookup('file', '/usr/bin/python', errors='ignore') else '/usr/bin/python3' }}"
+SOLR_SRC: "/usr/local/src/{{ SOLR_NAME }}"
+SOLR_OPT: "/opt/{{ SOLR_NAME }}"
+SOLR_VAR: "/var/{{ SOLR_NAME }}"
+SOLR_DATA: "{{ SOLR_VAR }}/data"
+SOLR_CONF: "{{ SOLR_OPT }}/conf/zoo.cfg"
+SOLR_SERVICE: "{{ SOLR_NAME }}"
+SOLR_SYSTEMD: "/usr/lib/systemd/system/{{ SOLR_SERVICE }}.service"
+SOLR_REPO: "https://github.com/apache/lucene-solr.git"
+SOLR_VERSION: 8.9.0
+SOLR_TAG: "releases/lucene-solr/{{ SOLR_VERSION }}"
+SOLR_PORT: 8983
 ZOOKEEPER_PORT: 2181
-APP_USER: "root"
-APP_CONFIG: computate
-APP_MIRROR_URL: https://archive.apache.org/dist/lucene/solr
-APP_DOWNLOAD_FILENAME: "{{ APP_NAME }}-{{ APP_VERSION }}.tgz"
-APP_DOWNLOAD_URL: "{{ APP_MIRROR_URL }}/{{ APP_VERSION }}/{{ APP_DOWNLOAD_FILENAME }}"
-APP_DOWNLOAD_DEST: "~/Downloads/{{ APP_DOWNLOAD_FILENAME }}"
-APP_DOWNLOAD_SHA512: 15150b7f191fd9e8d2c1bd8bb619dd4b3f27af2e0e94b7609031f7e745a2e263391c30f68865c208afb97ccaa9bde6d16050200e9bfccef65f762c2ed743c242
+SOLR_USER: "root"
+SOLR_CONFIG: computate
+SOLR_MIRROR_URL: https://archive.apache.org/dist/lucene/solr
+SOLR_DOWNLOAD_FILENAME: "{{ SOLR_NAME }}-{{ SOLR_VERSION }}.tgz"
+SOLR_DOWNLOAD_URL: "{{ SOLR_MIRROR_URL }}/{{ SOLR_VERSION }}/{{ SOLR_DOWNLOAD_FILENAME }}"
+SOLR_DOWNLOAD_DEST: "~/Downloads/{{ SOLR_DOWNLOAD_FILENAME }}"
+SOLR_DOWNLOAD_SHA512: 15150b7f191fd9e8d2c1bd8bb619dd4b3f27af2e0e94b7609031f7e745a2e263391c30f68865c208afb97ccaa9bde6d16050200e9bfccef65f762c2ed743c242
 COMPUTATE_REPO: https://github.com/computate-org/computate.git
 COMPUTATE_SRC: /usr/local/src/computate
 ZOOKEEPER_HOST_NAME: "localhost"
-APP_USE_PODMAN: false
+SOLR_USE_PODMAN: false
 
 ####################
 # Ansible defaults #
