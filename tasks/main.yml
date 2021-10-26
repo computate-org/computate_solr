@@ -53,6 +53,10 @@
     state: link
   become: true
   when: ansible_pkg_mgr == 'homebrew'
+- name: Download dir to ~ when platform is not Apple
+  set_fact:
+    SOLR_DOWNLOAD_DEST: ~/"{{ SOLR_DOWNLOAD_FILENAME }}"
+  when: ansible_pkg_mgr != 'homebrew'
 - name: Check for the {{ SOLR_NAME }} download
   stat:
     path: "{{ SOLR_DOWNLOAD_DEST }}"
