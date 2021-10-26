@@ -6,7 +6,7 @@ After=zookeeper.service
 Type=simple
 User={{ SOLR_USER }}
 WorkingDirectory={{ SOLR_OPT }}
-ExecStart=/usr/bin/podman run --name {{ SOLR_NAME }} --network {{ SOLR_NETWORK }} -v {{ SOLR_DATA }}:{{ SOLR_DATA }}:Z --rm -e ZK_HOST={{ ZOOKEEPER_HOST_NAME }} -e SOLR_INCLUDE=/usr/share/solr/solr.in.sh {{ SOLR_NAME }}:{{ SOLR_VERSION }}
+ExecStart=/usr/bin/podman run --name {{ SOLR_NAME }} --network {{ SOLR_NETWORK }} -v {{ SOLR_DATA }}:{{ SOLR_DATA }}:Z --rm -e ZK_HOST={{ ZOOKEEPER_HOST_NAME }} -e SOLR_INCLUDE=/usr/share/solr/solr.in.sh docker.io/library/{{ SOLR_NAME }}:{{ SOLR_VERSION }}
 ExecStop=/usr/bin/podman rm {{ SOLR_NAME }} -f
 LimitNOFILE=65000
 LimitNPROC=65000

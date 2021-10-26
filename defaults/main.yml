@@ -24,7 +24,7 @@ SOLR_DOWNLOAD_SHA512: 15150b7f191fd9e8d2c1bd8bb619dd4b3f27af2e0e94b7609031f7e745
 COMPUTATE_REPO: https://github.com/computate-org/computate.git
 COMPUTATE_SRC: /usr/local/src/computate
 ZOOKEEPER_HOST_NAME: "localhost"
-SOLR_USE_PODMAN: false
+SOLR_USE_PODMAN: true 
 
 ####################
 # Ansible defaults #
