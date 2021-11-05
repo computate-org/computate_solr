@@ -11,6 +11,7 @@
   when: SOLR_USE_PODMAN and ansible_pkg_mgr != 'homebrew' and SOLR_PYTHON == '/usr/bin/python' and ansible_os_family != 'RedHat'
   vars:
     ansible_python_interpreter: "{{ SOLR_PYTHON }}"
+  ignore_errors: true
 - name: "install Ansible dependencies for Red Hat Linux"
   package:
     name:
@@ -23,6 +24,7 @@
   when: SOLR_USE_PODMAN and ansible_pkg_mgr != 'homebrew' and SOLR_PYTHON == '/usr/bin/python' and ansible_os_family == 'RedHat'
   vars:
     ansible_python_interpreter: "{{ SOLR_PYTHON }}"
+  ignore_errors: true
 - name: "install podman dependency"
   package:
     name:
@@ -127,7 +129,7 @@
 - name: Copy the solr.xml to the {{ SOLR_NAME }} directory {{ SOLR_DATA }}. 
   copy:
     src: "{{ SOLR_OPT }}/server/solr/solr.xml"
-    dest: "{{ SOLR_OPT }}/solr.xml"
+    dest: "{{ SOLR_DATA }}/solr.xml"
     remote_src: true
   become: true
 - name: Delete the example directory {{ SOLR_OPT }}/example. 

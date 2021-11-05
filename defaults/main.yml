@@ -14,7 +14,7 @@ SOLR_VERSION: 8.9.0
 SOLR_TAG: "releases/lucene-solr/{{ SOLR_VERSION }}"
 SOLR_PORT: 8983
 ZOOKEEPER_PORT: 2181
-SOLR_USER: "root"
+SOLR_USER: "{{ 'root' if SOLR_USE_PODMAN=='true' else lookup('env', 'USER') }}"
 SOLR_CONFIG: computate
 SOLR_MIRROR_URL: https://archive.apache.org/dist/lucene/solr
 SOLR_DOWNLOAD_FILENAME: "{{ SOLR_NAME }}-{{ SOLR_VERSION }}.tgz"
