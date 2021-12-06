@@ -1,75 +1,75 @@
 ---
-- name: "install Ansible dependencies"
-  package:
-    name:
-      - python3
-      - python3-pip
-      - libselinux-python
-      - libsemanage-python
-    state: present
-  become: true
-  when: SOLR_USE_PODMAN and ansible_pkg_mgr != 'homebrew' and SOLR_PYTHON == '/usr/bin/python' and ansible_os_family != 'RedHat'
-  vars:
-    ansible_python_interpreter: "{{ SOLR_PYTHON }}"
-  ignore_errors: true
-- name: "install Ansible dependencies for Red Hat Linux"
-  package:
-    name:
-      - python3
-      - python3-pip
-      - python3-libselinux
-      - python3-libsemanage
-    state: present
-  become: true
-  when: SOLR_USE_PODMAN and ansible_pkg_mgr != 'homebrew' and SOLR_PYTHON == '/usr/bin/python' and ansible_os_family == 'RedHat'
-  vars:
-    ansible_python_interpreter: "{{ SOLR_PYTHON }}"
-  ignore_errors: true
-- name: "install podman dependency"
-  package:
-    name:
-      - podman
-    state: present
-  become: true
-  when: SOLR_USE_PODMAN and ansible_pkg_mgr != 'homebrew' #and SOLR_PYTHON == '/usr/bin/python3'
-  vars:
-    ansible_python_interpreter: "{{ SOLR_PYTHON }}"
-  ignore_errors: true
-- name: Set container_manage_cgroup flag on to run podman containers as systemd services and keep it persistent across reboots
-  ansible.posix.seboolean:
-    name: container_manage_cgroup
-    state: true
-    persistent: true
-  become: true
-  vars:
-    ansible_python_interpreter: "{{ SOLR_PYTHON }}"
-  when: SOLR_USE_PODMAN
+#- name: "install Ansible dependencies"
+#  package:
+#    name:
+#      - python3
+#      - python3-pip
+#      - libselinux-python
+#      - libsemanage-python
+#    state: present
+#  become: true
+#  when: SOLR_USE_PODMAN and ansible_pkg_mgr != 'homebrew' and SOLR_PYTHON == '/usr/bin/python' and ansible_os_family != 'RedHat'
+#  vars:
+#    ansible_python_interpreter: "{{ SOLR_PYTHON }}"
+#  ignore_errors: true
+#- name: "install Ansible dependencies for Red Hat Linux"
+#  package:
+#    name:
+#      - python3
+#      - python3-pip
+#      - python3-libselinux
+#      - python3-libsemanage
+#    state: present
+#  become: true
+#  when: SOLR_USE_PODMAN and ansible_pkg_mgr != 'homebrew' and SOLR_PYTHON == '/usr/bin/python' and ansible_os_family == 'RedHat'
+#  vars:
+#    ansible_python_interpreter: "{{ SOLR_PYTHON }}"
+#  ignore_errors: true
+#- name: "install podman dependency"
+#  package:
+#    name:
+#      - podman
+#    state: present
+#  become: true
+#  when: SOLR_USE_PODMAN and ansible_pkg_mgr != 'homebrew' #and SOLR_PYTHON == '/usr/bin/python3'
+#  vars:
+#    ansible_python_interpreter: "{{ SOLR_PYTHON }}"
+#  ignore_errors: true
+#- name: Set container_manage_cgroup flag on to run podman containers as systemd services and keep it persistent across reboots
+#  ansible.posix.seboolean:
+#    name: container_manage_cgroup
+#    state: true
+#    persistent: true
+#  become: true
+#  vars:
+#    ansible_python_interpreter: "{{ SOLR_PYTHON }}"
+#  when: SOLR_USE_PODMAN
 - name: Check if javac command exists
   stat:
     path: /usr/bin/javac
   register: JAVAC_EXISTS
-- name: Install {{ SOLR_NAME }} dependencies. 
-  package:
-    name: [git,java-1.8.0-openjdk]
-    state: present
-  become: yes
-  vars:
-    ansible_python_interpreter: "{{ SOLR_PYTHON }}"
-  when: ansible_pkg_mgr != 'homebrew'
-  ignore_errors: true
-- name: Install {{ SOLR_NAME }} dependencies. 
-  package:
-    name: [openjdk,gnu-tar]
-    state: present
-  when: ansible_pkg_mgr == 'homebrew'
-  ignore_errors: true
-- name: Link openjdk to Library
-  file:
-    src: /usr/local/opt/openjdk/libexec/openjdk.jdk
-    dest: /Library/Java/JavaVirtualMachines/openjdk.jdk
-    state: link
-  become: true
-  when: ansible_pkg_mgr == 'homebrew'
+#- name: Install {{ SOLR_NAME }} dependencies. 
+#  package:
+#    name: [git,java-1.8.0-openjdk]
+#    state: present
+#  become: yes
+#  vars:
+#    ansible_python_interpreter: "{{ SOLR_PYTHON }}"
+#  when: ansible_pkg_mgr != 'homebrew'
+#  ignore_errors: true
+#- name: Install {{ SOLR_NAME }} dependencies. 
+#  package:
+#    name: [openjdk,gnu-tar]
+#    state: present
+#  when: ansible_pkg_mgr == 'homebrew'
+#  ignore_errors: true
+#- name: Link openjdk to Library
+#  file:
+#    src: /usr/local/opt/openjdk/libexec/openjdk.jdk
+#    dest: /Library/Java/JavaVirtualMachines/openjdk.jdk
+#    state: link
+#  become: true
+#  when: ansible_pkg_mgr == 'homebrew'
 - name: Download dir to ~ when platform is not Apple
   set_fact:
     SOLR_DOWNLOAD_DEST: ~/"{{ SOLR_DOWNLOAD_FILENAME }}"
@@ -87,8 +87,6 @@
   file:
     name: "{{ COMPUTATE_SRC }}"
     state: directory
-    owner: "{{ USER_NAME }}"
-  become: true
 - name: Check for the computate pom.xml
   stat:
     path: "{{ COMPUTATE_SRC }}/pom.xml"
@@ -102,8 +100,6 @@
   file:
     name: "{{ SOLR_OPT }}"
     state: directory
-    owner: "{{ USER_NAME }}"
-  become: true
 - name: Install {{ SOLR_NAME }} into the {{ SOLR_OPT }} install directory. 
   unarchive:
     src: "{{ SOLR_DOWNLOAD_DEST }}"
@@ -114,27 +110,24 @@
   file:
     name: "{{ SOLR_DATA }}"
     state: directory
-    owner: "{{ SOLR_USER }}"
     mode: 0777
-  become: true
-- name: set SELinux permissions on {{ SOLR_DATA }}
-  sefcontext:
-    target: "{{ SOLR_DATA }}"
-    setype: container_file_t
-  become: true
-  vars:
-    ansible_python_interpreter: "{{ SOLR_PYTHON }}"
-  when: SOLR_USE_PODMAN
-- name: reload SELinux policy to ensure that {{ SOLR_NAME }} is executable
-  command: "restorecon -irv {{ SOLR_DATA }}"
-  become: true
-  when: SOLR_USE_PODMAN
+#- name: set SELinux permissions on {{ SOLR_DATA }}
+#  sefcontext:
+#    target: "{{ SOLR_DATA }}"
+#    setype: container_file_t
+#  become: true
+#  vars:
+#    ansible_python_interpreter: "{{ SOLR_PYTHON }}"
+#  when: SOLR_USE_PODMAN
+#- name: reload SELinux policy to ensure that {{ SOLR_NAME }} is executable
+#  command: "restorecon -irv {{ SOLR_DATA }}"
+#  become: true
+#  when: SOLR_USE_PODMAN
 - name: Copy the solr.xml to the {{ SOLR_NAME }} directory {{ SOLR_DATA }}. 
   copy:
     src: "{{ SOLR_OPT }}/server/solr/solr.xml"
     dest: "{{ SOLR_DATA }}/solr.xml"
     remote_src: true
-  become: true
 - name: Delete the example directory {{ SOLR_OPT }}/example. 
   file:
     name: "{{ SOLR_OPT }}/example"
@@ -175,6 +168,7 @@
 - name: Reload the services. 
   systemd:
     daemon_reload: true
+    scope: "{{ 'system' if ansible_distribution_file_variety == 'RedHat' and (ansible_distribution_major_version | int) <= 7 else 'user' }}"
   become: "{{ ansible_distribution_file_variety == 'RedHat' and (ansible_distribution_major_version | int) <= 7 }}"
   when: ansible_pkg_mgr != 'homebrew'
 - name: Start and enable the {{ SOLR_NAME }} service. 
@@ -182,6 +176,7 @@
     name: "{{ SOLR_SERVICE }}"
     enabled: true
     state: restarted
+    scope: "{{ 'system' if ansible_distribution_file_variety == 'RedHat' and (ansible_distribution_major_version | int) <= 7 else 'user' }}"
   become: "{{ ansible_distribution_file_variety == 'RedHat' and (ansible_distribution_major_version | int) <= 7 }}"
   when: ansible_pkg_mgr != 'homebrew'
 - name: Create the {{ SOLR_NAME }} launchd service.
