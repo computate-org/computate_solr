@@ -1,75 +1,18 @@
 ---
-#- name: "install Ansible dependencies"
-#  package:
-#    name:
-#      - python3
-#      - python3-pip
-#      - libselinux-python
-#      - libsemanage-python
-#    state: present
-#  become: true
-#  when: SOLR_USE_PODMAN and ansible_pkg_mgr != 'homebrew' and SOLR_PYTHON == '/usr/bin/python' and ansible_os_family != 'RedHat'
-#  vars:
-#    ansible_python_interpreter: "{{ SOLR_PYTHON }}"
-#  ignore_errors: true
-#- name: "install Ansible dependencies for Red Hat Linux"
-#  package:
-#    name:
-#      - python3
-#      - python3-pip
-#      - python3-libselinux
-#      - python3-libsemanage
-#    state: present
-#  become: true
-#  when: SOLR_USE_PODMAN and ansible_pkg_mgr != 'homebrew' and SOLR_PYTHON == '/usr/bin/python' and ansible_os_family == 'RedHat'
-#  vars:
-#    ansible_python_interpreter: "{{ SOLR_PYTHON }}"
-#  ignore_errors: true
-#- name: "install podman dependency"
-#  package:
-#    name:
-#      - podman
-#    state: present
-#  become: true
-#  when: SOLR_USE_PODMAN and ansible_pkg_mgr != 'homebrew' #and SOLR_PYTHON == '/usr/bin/python3'
-#  vars:
-#    ansible_python_interpreter: "{{ SOLR_PYTHON }}"
-#  ignore_errors: true
-#- name: Set container_manage_cgroup flag on to run podman containers as systemd services and keep it persistent across reboots
-#  ansible.posix.seboolean:
-#    name: container_manage_cgroup
-#    state: true
-#    persistent: true
-#  become: true
-#  vars:
-#    ansible_python_interpreter: "{{ SOLR_PYTHON }}"
-#  when: SOLR_USE_PODMAN
+- name: "Install dependencies as root: {{ SOLR_DEPENDENCIES | join(' ') }}"
+  package:
+    name: "{{ SOLR_DEPENDENCIES }}"
+  become: true
+  register: INSTALL_DEPENDENCIES
+  ignore_errors: true
+- name: "Install dependencies as user {{ SOLR_USER }}: {{ SOLR_DEPENDENCIES | join(' ') }}"
+  shell: "pkcon install -y {{ item }} | true"
+  loop: "{{ SOLR_DEPENDENCIES }}"
+  when: INSTALL_DEPENDENCIES.failed
 - name: Check if javac command exists
   stat:
     path: /usr/bin/javac
   register: JAVAC_EXISTS
-#- name: Install {{ SOLR_NAME }} dependencies. 
-#  package:
-#    name: [git,java-1.8.0-openjdk]
-#    state: present
-#  become: yes
-#  vars:
-#    ansible_python_interpreter: "{{ SOLR_PYTHON }}"
-#  when: ansible_pkg_mgr != 'homebrew'
-#  ignore_errors: true
-#- name: Install {{ SOLR_NAME }} dependencies. 
-#  package:
-#    name: [openjdk,gnu-tar]
-#    state: present
-#  when: ansible_pkg_mgr == 'homebrew'
-#  ignore_errors: true
-#- name: Link openjdk to Library
-#  file:
-#    src: /usr/local/opt/openjdk/libexec/openjdk.jdk
-#    dest: /Library/Java/JavaVirtualMachines/openjdk.jdk
-#    state: link
-#  become: true
-#  when: ansible_pkg_mgr == 'homebrew'
 - name: Download dir to ~ when platform is not Apple
   set_fact:
     SOLR_DOWNLOAD_DEST: ~/"{{ SOLR_DOWNLOAD_FILENAME }}"
