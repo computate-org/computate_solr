@@ -14,3 +14,7 @@ ExecStart={{ SOLR_OPT }}/bin/solr start -f -c -s {{ SOLR_DATA }} -h localhost -p
 LimitNOFILE=65000
 LimitNPROC=65000
 Restart=on-failure
+
+[Install]
+WantedBy=default.target
+
